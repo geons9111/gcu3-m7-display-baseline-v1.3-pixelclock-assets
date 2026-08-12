@@ -13,7 +13,8 @@
 #define GCU3_DSI_HS_BITRATE_BPS  1500000000U
 #define GCU3_DPU_PIXEL_FORMAT_RGB565 0U /* placeholder value; map to real
                                             fsl_dpu.h enum at integration time */
-#define GCU3_FRAMEBUFFER_ADDR    0x20400000U /* OCRAM region, TBD confirm vs. RDC/TRDC map */
+
+extern const uint8_t g_gcu3_logo_framebuffer[];
 
 void display_engine_init(void)
 {
@@ -21,7 +22,7 @@ void display_engine_init(void)
         .width_px         = GCU3_DISPLAY_WIDTH,
         .height_px        = GCU3_DISPLAY_HEIGHT,
         .pixel_format     = GCU3_DPU_PIXEL_FORMAT_RGB565,
-        .framebuffer_addr = GCU3_FRAMEBUFFER_ADDR
+        .framebuffer_addr = (uint32_t)(uintptr_t)g_gcu3_logo_framebuffer
     };
     (void)dpu_driver_init(&dpu_cfg);
 

@@ -19,6 +19,7 @@ add_executable(gcu3_m7_display
     hal/backlight/backlight_hal.c
     hal/power/power_hal.c
     hal/ipc/ipc_hal.c
+    hal/timer/timer_hal.c
     display_engine/display_engine.c
     driver/dpu/dpu_driver.c
     driver/mipi_dsi/mipi_dsi_driver.c
@@ -43,6 +44,7 @@ target_include_directories(gcu3_m7_display PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/hal/mipi_dsi
     ${CMAKE_CURRENT_SOURCE_DIR}/hal/i2c
     ${CMAKE_CURRENT_SOURCE_DIR}/hal/ipc
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal/timer
     ${CMAKE_CURRENT_SOURCE_DIR}/display_engine
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/dpu
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/mipi_dsi
