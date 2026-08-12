@@ -30,6 +30,6 @@ void ipc_manager_send_display_ready(void);
 void ipc_manager_send_safe_display(void);
 void ipc_manager_poll(void);
 
-/* Set by rx callback when A55_HEARTBEAT is received this poll cycle;
- * consumed by health_manager to avoid a second parallel RPMsg listener. */
+/* 今回のポーリングサイクルでA55_HEARTBEATを受信した際にrxコールバックによって設定されます。
+ * 並行する2つ目のRPMsgリスナーを避けるため、health_managerによって消費されます。 */
 uint32_t ipc_manager_last_heartbeat_sequence(void);

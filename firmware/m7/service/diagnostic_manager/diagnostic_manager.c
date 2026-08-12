@@ -7,5 +7,5 @@ void diagnostic_manager_init(void)
 void diagnostic_manager_report(diagnostic_event_t event)
 {
     (void)event;
-    /* Level 1 internal diagnostic baseline. UDS/DTC is a later integration level. */
+    /* レベル1の内部診断ベースライン。UDS/DTCは後の統合レベルです。 */
 }

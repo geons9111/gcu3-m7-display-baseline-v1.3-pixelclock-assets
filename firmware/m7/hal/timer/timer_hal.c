@@ -1,5 +1,5 @@
 #include "timer_hal.h"
-#include "fsl_common.h" /* For SystemCoreClock */
+#include "fsl_common.h" /* SystemCoreClock用 */
 
 static volatile uint32_t s_ms_ticks = 0;
 
@@ -10,8 +10,8 @@ void SysTick_Handler(void)
 
 void timer_hal_init(void)
 {
-    /* Initialize SysTick to generate 1ms interrupts.
-     * Note: SystemCoreClock must be initialized by the BSP.
+    /* 1msの割り込みを生成するようにSysTickを初期化します。
+     * 注: SystemCoreClockはBSPによって初期化されている必要があります。
      */
     SysTick_Config(SystemCoreClock / 1000U);
 }

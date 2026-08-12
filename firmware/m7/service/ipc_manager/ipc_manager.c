@@ -28,9 +28,9 @@ static void on_rpmsg_rx(const ipc_message_header_t *header,
         last_heartbeat_sequence = header->sequence;
         break;
     default:
-        /* Other inbound types (A55_READY, DISPLAY_ACTIVE, DISPLAY_FAULT)
-         * are consumed directly by ownership_manager in a later
-         * integration step; not required to close GATE-01 itself. */
+        /* その他のインバウンドタイプ（A55_READY, DISPLAY_ACTIVE, DISPLAY_FAULT）は、
+         * 後の統合ステップでownership_managerによって直接消費されるため、
+         * GATE-01自体を閉じる必要はありません。 */
         break;
     }
 }

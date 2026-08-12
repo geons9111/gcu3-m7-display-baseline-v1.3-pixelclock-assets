@@ -1,14 +1,14 @@
 /*
  * ipc_hal.c
  *
- * GCU3 M7 — RPMsg-Lite transport for Runtime IPC (GATE-01, see ipc_hal.h).
+ * GCU3 M7 — Runtime IPC 用の RPMsg-Lite トランスポート (GATE-01、ipc_hal.h を参照)。
  *
- * Endpoint / channel naming: a single RPMsg name-service channel
- * "rpmsg-gcu3-display" is used to carry all baseline v1.1 §11.2 message
- * types (M7_READY .. SAFE_DISPLAY) multiplexed by ipc_message_header_t.
- * A single channel (rather than one per message type) keeps the A55-side
- * kernel driver / userspace binding simple and matches the two
- * virtio queues already observed on real hardware (one per direction).
+ * エンドポイント / チャネルの命名: ipc_message_header_t によって多重化された、
+ * すべての baseline v1.1 §11.2 メッセージタイプ (M7_READY .. SAFE_DISPLAY) を
+ * 転送するために、単一の RPMsg ネームサービスチャネル "rpmsg-gcu3-display" が使用されます。
+ * (メッセージタイプごとに 1 つではなく) 単一のチャネルを使用することで、A55 側の
+ * カーネルドライバ / ユーザスペースのバインディングをシンプルに保ち、
+ * 実際のハードウェアで既に確認されている 2 つの virtio キュー (方向ごとに 1 つ) と一致させます。
  */
 
 #include "ipc_hal.h"
@@ -20,7 +20,7 @@
 #include "rpmsg_queue.h"
 
 #define GCU3_RPMSG_CHANNEL_NAME  "rpmsg-gcu3-display"
-#define GCU3_RPMSG_LOCAL_EPT     30U   /* arbitrary, must not collide with other GCU3 rpmsg users */
+#define GCU3_RPMSG_LOCAL_EPT     30U   /* 任意。他のGCU3 rpmsgユーザーと衝突してはいけません */
 #define GCU3_RPMSG_LINK_ID       RL_PLATFORM_IMX95_M7_A55_LINK_ID
 
 static struct rpmsg_lite_instance *s_rpmsg          = NULL;
@@ -36,8 +36,8 @@ static void ipc_hal_ns_bind_callback(uint32_t new_ept, const char *new_ept_name,
     (void)flags;
     (void)user_data;
 
-    /* A55-side endpoint announced itself via the RPMsg name service —
-     * only now is it safe to start sending Runtime IPC messages. */
+    /* A55側のエンドポイントがRPMsgネームサービスを介して自身をアナウンスしました —
+     * これにより、Runtime IPCメッセージの送信を安全に開始できます。 */
     if (new_ept != 0U)
     {
         s_channel_ready = true;
@@ -48,9 +48,9 @@ void ipc_hal_init_rpmsg(ipc_hal_rx_callback_t rx_callback)
 {
     s_rx_callback = rx_callback;
 
-    /* RL_REMOTE: M7 never owns the vring/master role — consistent with
-     * the GATE-01 finding that Linux/A55 remains the RPMsg master while
-     * M7 lifecycle is separately mediated by System Manager. */
+    /* RL_REMOTE: M7は決してvring/masterロールを所有しません — これは、
+     * Linux/A55がRPMsgマスターであり続け、M7のライフサイクルはSystem Managerによって
+     * 個別に調停されるというGATE-01の所見と一致しています。 */
     s_rpmsg = rpmsg_lite_remote_init((void *)RPMSG_LITE_SHMEM_BASE,
                                       GCU3_RPMSG_LINK_ID,
                                       RL_NO_FLAGS);
@@ -59,9 +59,9 @@ void ipc_hal_init_rpmsg(ipc_hal_rx_callback_t rx_callback)
     s_endpoint = rpmsg_lite_create_ept(s_rpmsg, GCU3_RPMSG_LOCAL_EPT,
                                         rpmsg_queue_rx_cb, s_rx_queue);
 
-    /* Announce the channel so the A55-side driver can discover it. Do
-     * NOT gate this on ipc_hal_channel_ready(); the NS announcement is
-     * how the A55 side learns we exist in the first place. */
+    /* A55側のドライバが発見できるようにチャネルをアナウンスします。
+     * これを ipc_hal_channel_ready() でゲートしないでください。NSアナウンスは、
+     * そもそもA55側が我々の存在を知るための手段です。 */
     (void)rpmsg_ns_announce(s_rpmsg, s_endpoint, GCU3_RPMSG_CHANNEL_NAME,
                              RL_NS_CREATE);
 
@@ -84,10 +84,10 @@ void ipc_hal_send_with_payload(const ipc_message_header_t *header,
 {
     if (s_rpmsg == NULL || s_endpoint == NULL || !s_channel_ready)
     {
-        /* Fail-safe: silently drop rather than block. Health/Fault
-         * detection (baseline v1.1 §10) relies on A55 heartbeat timeout,
-         * not on send() success, so a dropped Runtime IPC message here
-         * does not by itself corrupt the Ownership state machine. */
+        /* フェイルセーフ: ブロックするのではなく、静かに破棄します。Health/Fault
+         * 検出 (baseline v1.1 §10) は send() の成功ではなく、A55ハートビートのタイムアウトに
+         * 依存しているため、ここでRuntime IPCメッセージが破棄されても、
+         * それ自体がOwnershipステートマシンを破壊することはありません。 */
         return;
     }
 
@@ -97,7 +97,7 @@ void ipc_hal_send_with_payload(const ipc_message_header_t *header,
 
     if (total_len > sizeof(tx_buf))
     {
-        return; /* oversized payload; caller error */
+        return; /* サイズ超過のペイロード; 呼び出し元のエラー */
     }
 
     (void)memcpy(tx_buf, header, sizeof(ipc_message_header_t));
@@ -106,9 +106,9 @@ void ipc_hal_send_with_payload(const ipc_message_header_t *header,
         (void)memcpy(tx_buf + sizeof(ipc_message_header_t), payload, payload_length);
     }
 
-    /* Destination endpoint (RPMSG_LITE_NS_ANNOUNCE_EPT-derived remote
-     * addr) is resolved by rpmsg_lite via the NS bind callback; using
-     * rpmsg_lite_send with the endpoint's bound dest_addr. */
+    /* 宛先エンドポイント (RPMSG_LITE_NS_ANNOUNCE_EPT から派生したリモート
+     * アドレス) は、NSバインドコールバックを介して rpmsg_lite によって解決されます。
+     * エンドポイントのバインドされた dest_addr とともに rpmsg_lite_send を使用します。 */
     (void)rpmsg_lite_send(s_rpmsg, s_endpoint,
                            rpmsg_lite_get_endpoint_address(s_endpoint),
                            (char *)tx_buf, total_len, RL_DONT_BLOCK);
@@ -125,7 +125,7 @@ void ipc_hal_poll(void)
     uint32_t src_addr = 0U;
     uint32_t rx_len = 0U;
 
-    /* Non-blocking drain of all pending messages this cycle. */
+    /* このサイクルでのすべての保留中メッセージのノンブロッキングドレイン。 */
     while (rpmsg_queue_recv_nocopy(s_rpmsg, s_rx_queue, &src_addr,
                                     (char **)&rx_data, &rx_len, 0U) == RL_SUCCESS)
     {
@@ -139,9 +139,9 @@ void ipc_hal_poll(void)
             {
                 s_rx_callback(hdr, payload, payload_len);
             }
-            /* Version mismatch: drop rather than misinterpret payload
-             * layout — see baseline v1.1 review item on missing
-             * protocol-version handling in §11.2/§22. */
+            /* バージョン不一致: ペイロードレイアウトを誤って解釈するのではなく、破棄します
+             * — §11.2/§22 におけるプロトコルバージョンの処理の欠落に関する
+             * baseline v1.1 レビュー項目を参照してください。 */
         }
         rpmsg_queue_nocopy_free(s_rpmsg, rx_data);
     }

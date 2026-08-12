@@ -29,7 +29,7 @@ void boot_manager_run(void)
         break;
 
     case BOOT_STATE_PASSWORD_WAIT:
-        /* User interaction is intentionally outside the boot-time budget. */
+        /* ユーザー操作は意図的にブート時間の予算外としています。 */
         state = BOOT_STATE_BOOT_COMPLETE;
         break;
 

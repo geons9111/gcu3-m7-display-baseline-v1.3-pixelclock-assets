@@ -33,7 +33,7 @@ void health_manager_poll(void)
     } else {
         if ((now - last_check_ms) > GCU3_A55_HEARTBEAT_TIMEOUT_MS) {
             miss_count++;
-            last_check_ms = now; /* Reset timer for the next miss interval */
+            last_check_ms = now; /* 次のミスインターバルのためにタイマーをリセットする */
             
             if (miss_count >= GCU3_A55_HEARTBEAT_MISS_COUNT) {
                 a55_healthy = false;

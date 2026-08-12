@@ -1,15 +1,9 @@
 /*
  * mipi_dsi_driver.c
  *
- * GCU3 M7 — MIPI-DSI host driver over MCUXpresso SDK fsl_mipi_dsi.h.
+ * GCU3 M7 — MCUXpresso SDK fsl_mipi_dsi.h 上の MIPI-DSI ホストドライバー。
  *
- * i.MX95 DSI host is a Synopsys DesignWare DSI controller (same IP
- * family as i.MX8M/93); the SDK exposes it via MIPI_DSI_Init /
- * dsi_dpi_config_t / dsi_config_t. Base address and clock names below
- * follow the SDK's fsl_device_registers.h for MIMX95 — verify against
- * the actual mcux-sdk checkout before first real-hardware bring-up
- * (see GCU3 TODO: LPUART_BASE-style placeholder caveat applies equally
- * here to MIPI_DSI base/clock names).
+ * i.MX95 DSI ホストは Synopsys DesignWare DSI コントローラーです (i.MX8M/93 と同じ IP ファミリ)。SDK はこれを MIPI_DSI_Init / dsi_dpi_config_t / dsi_config_t 経由で公開します。以下のベースアドレスとクロック名は MIMX95 用の SDK の fsl_device_registers.h に従っています — 最初の実際のハードウェア Bring-up の前に、実際の mcux-sdk チェックアウトと照らし合わせて確認してください (GCU3 TODO: LPUART_BASE スタイルのプレースホルダーの注意事項は、ここでの MIPI_DSI ベース/クロック名にも等しく適用されます を参照)。
  */
 
 #include "mipi_dsi_driver.h"
@@ -17,7 +11,7 @@
 #include "fsl_mipi_dsi.h"
 #include "fsl_clock.h"
 
-static MIPI_DSI_HOST_Type *const s_dsi_base = MIPI_DSI0; /* TBD: confirm instance vs. board routing */
+static MIPI_DSI_HOST_Type *const s_dsi_base = MIPI_DSI0; /* TBD: インスタンスとボードルーティングの確認 */
 
 static dsi_config_t          s_dsi_config;
 static dsi_dphy_config_t     s_dphy_config;
@@ -33,14 +27,13 @@ int mipi_dsi_driver_init(const mipi_dsi_driver_config_t *config)
 
     DSI_GetDefaultConfig(&s_dsi_config);
     s_dsi_config.numLanes   = s_cfg.lane_count;
-    s_dsi_config.enableHsClk = true; /* continuous HS clock: reduces per-frame
-                                         DPHY lock latency, favors fast-boot
-                                         over the marginal power cost -
-                                         acceptable per REQ-M7-02 minimal-init. */
+    s_dsi_config.enableHsClk = true; /* 連続 HS クロック: フレームごとの DPHY ロックレイテンシを削減し、
+                                         わずかな電力コストよりも高速起動を優先します -
+                                         REQ-M7-02 の minimal-init に従い許容されます。 */
 
-    /* DPHY PLL: derive from requested per-lane HS bitrate. The SDK
-     * helper computes PLL divider settings; refClkFreq is the DSI
-     * reference clock as configured by imx95_bsp_init(). */
+    /* DPHY PLL: 要求されたレーンごとの HS ビットレートから導出します。SDK の
+     * ヘルパーが PLL 分周器の設定を計算します。refClkFreq は imx95_bsp_init() 
+     * によって設定された DSI リファレンスクロックです。 */
     uint32_t dsi_ref_clk_hz = CLOCK_GetIpFreq(kCLOCK_Root_MipiDsiRef);
     DSI_GetDphyDefaultConfig(&s_dphy_config, s_cfg.hs_bitrate_bps, dsi_ref_clk_hz);
 
@@ -61,10 +54,10 @@ int mipi_dsi_driver_init(const mipi_dsi_driver_config_t *config)
 
 int mipi_dsi_driver_start(void)
 {
-    /* Enter HS mode for pixel data transmission. Command mode (LP) is
-     * used only for the bring-up DCS handshake in
-     * mipi_dsi_driver_dcs_write(); the bulk of runtime traffic is video
-     * mode over the DPI->DSI datapath configured by the DPU driver. */
+    /* ピクセルデータ送信のために HS モードに入ります。コマンドモード (LP) は
+     * mipi_dsi_driver_dcs_write() での Bring-up の DCS ハンドシェイクにのみ
+     * 使用されます。実行時のトラフィックの大半は、DPU ドライバーによって設定された
+     * DPI->DSI データパス上のビデオモードです。 */
     DSI_SetDpiConfig(s_dsi_base, &s_dsi_config, s_cfg.lane_count,
                       s_cfg.width_px, s_cfg.height_px);
     return 0;
@@ -84,10 +77,9 @@ int mipi_dsi_driver_dcs_write(uint8_t dcs_cmd, const uint8_t *data, uint16_t len
     xfer.subLpm     = false;
 
     status_t st = (length <= 2U)
-                      ? DSI_TransferWrite(s_dsi_base, &xfer)   /* short DCS write */
-                      : DSI_TransferWrite(s_dsi_base, &xfer);  /* long DCS write; SDK
-                                                                   picks the correct
-                                                                   packet type based
-                                                                   on txDataSize. */
+                      ? DSI_TransferWrite(s_dsi_base, &xfer)   /* ショート DCS 書き込み */
+                      : DSI_TransferWrite(s_dsi_base, &xfer);  /* ロング DCS 書き込み。SDK が
+                                                                   txDataSize に基づいて正しい
+                                                                   パケットタイプを選択します。 */
     return (st == kStatus_Success) ? 0 : -1;
 }

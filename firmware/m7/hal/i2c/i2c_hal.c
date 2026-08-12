@@ -1,14 +1,13 @@
 /*
  * i2c_hal.c
  *
- * GCU3 M7 — I2C HAL implementation over MCUXpresso SDK LPI2C driver.
+ * GCU3 M7 — MCUXpresso SDK LPI2Cドライバ上でのI2C HAL実装。
  *
- * NOTE: fsl_lpi2c.h / fsl_clock.h come from the i.MX95 MCUXpresso SDK
- * (mcuxsdk) referenced by firmware/m7/CMakeLists.txt's SdkRootDirPath.
- * This file assumes the SDK's LPI2C master driver (fsl_lpi2c.h) and the
- * board's LPI2C clock root are already brought up by imx95_bsp_init()
- * (pinmux + clock gating), consistent with GCU3's existing hardware_init
- * pattern used by the M7 hello_world bring-up firmware.
+ * 注: fsl_lpi2c.h / fsl_clock.h は firmware/m7/CMakeLists.txt の SdkRootDirPath によって参照される
+ * i.MX95 MCUXpresso SDK (mcuxsdk) から提供されます。
+ * このファイルは、M7 hello_world 立ち上げファームウェアで使用される既存の GCU3 の hardware_init
+ * パターンに従い、SDK の LPI2C マスタードライバ (fsl_lpi2c.h) とボードの LPI2C クロックルートが
+ * imx95_bsp_init() (pinmux + clock gating) によってすでに立ち上げられていることを前提とします。
  */
 
 #include "i2c_hal.h"
@@ -19,10 +18,9 @@
 static LPI2C_Type *s_i2c_base   = NULL;
 static uint32_t     s_i2c_srcclk = 0U;
 
-/* imx95lpd5evk19 LPI2C instance base table.
- * Confirm against board schematic / fsl_device_registers.h before
- * production use; kept explicit (not guessed silently) per prior
- * review note on unverified addresses. */
+/* imx95lpd5evk19 LPI2C インスタンスのベーステーブル。
+ * 本番環境での使用前に、ボード回路図 / fsl_device_registers.h を確認してください。
+ * 未確認のアドレスに関する以前のレビューの指摘に従い、(暗黙的に推測せず)明示的に保持しています。 */
 static LPI2C_Type *i2c_hal_instance_base(uint32_t instance)
 {
     switch (instance)
@@ -47,8 +45,8 @@ i2c_hal_status_t i2c_hal_init(uint32_t instance, uint32_t baudrate_hz)
     LPI2C_MasterGetDefaultConfig(&config);
     config.baudRate_Hz = baudrate_hz;
 
-    /* Source clock: BSP owns the actual CCM root selection; this HAL
-     * only reads back the resulting frequency. */
+    /* Source clock: 実際のCCMルートの選択はBSPが行います。このHALは
+     * 結果の周波数を読み戻すだけです。 */
     s_i2c_srcclk = CLOCK_GetIpFreq(kCLOCK_Root_Lpi2c1 + instance);
 
     LPI2C_MasterInit(s_i2c_base, &config, s_i2c_srcclk);

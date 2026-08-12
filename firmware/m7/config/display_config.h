@@ -4,7 +4,7 @@
 #define GCU3_DISPLAY_REFRESH_HZ 60U
 #define GCU3_DISPLAY_BPP 16U
 #define GCU3_DSI_LANE_COUNT 4U
-/* Intentionally 0: final PCLK requires the 7-inch panel timing table. */
+/* 意図的に0: 最終的なPCLKには7インチパネルのタイミングテーブルが必要です。 */
 #define GCU3_DISPLAY_PIXEL_CLOCK_HZ 0U
 #define GCU3_ACTIVE_PIXEL_RATE_HZ 36864000U
 #define GCU3_ACTIVE_DSI_LANE_RATE_BPS 147456000U

@@ -37,11 +37,11 @@ int display_link_health_check(void)
 {
     switch (s_backend) {
     case DISPLAY_LINK_HDMI:
-        return 0; /* TODO: HDMI adapter health_check not yet implemented */
+        return 0; /* TODO: HDMIアダプタのhealth_checkはまだ実装されていません */
     case DISPLAY_LINK_FPD_LINK:
         return fpd_link_adapter_health_check();
     case DISPLAY_LINK_GMSL:
-        return 0; /* TODO: GMSL adapter health_check not yet implemented */
+        return 0; /* TODO: GMSLアダプタのhealth_checkはまだ実装されていません */
     default:
         return -1;
     }

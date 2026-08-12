@@ -3,22 +3,20 @@
 #include "mipi_dsi_hal.h"
 #include "display_config.h"
 
-/* HS bitrate / pixel format are left as explicit named constants here
- * (not yet in display_config.h) pending §21/GATE-07-style confirmation
- * against the actual DSI-to-SerDes bridge datasheet (fpd_link_adapter).
- * DS90UB941AS-Q1 supports up to 4 DSI lanes / 1.5Gbps per lane; 4-lane
- * config chosen to leave headroom for the 1280x480 target in
- * display_config.h without needing compression. */
+/* HSビットレート/ピクセルフォーマットは、実際のDSIからSerDesへのブリッジデータシート(fpd_link_adapter)に対する§21/GATE-07スタイルの確認が保留中のため、
+ * ここでは明示的な名前付き定数として残されています(display_config.hにはまだありません)。
+ * DS90UB941AS-Q1は、レーンあたり最大1.5Gbpsの4つのDSIレーンをサポートします。
+ * 圧縮を必要とせずにdisplay_config.hの1280x480ターゲットのヘッドルームを残すために、4レーン設定が選択されました。 */
 #define GCU3_DSI_HS_BITRATE_BPS  1500000000U
-#define GCU3_DPU_PIXEL_FORMAT_RGB565 0U /* placeholder value; map to real
-                                            fsl_dpu.h enum at integration time */
+#define GCU3_DPU_PIXEL_FORMAT_RGB565 0U /* プレースホルダー値。統合時に実際の
+                                            fsl_dpu.hの列挙型にマッピングします */
 
 extern const uint8_t g_gcu3_logo_framebuffer[];
 
 void display_engine_init(void)
 {
     if (GCU3_DISPLAY_PIXEL_CLOCK_HZ == 0U) {
-        /* Fail-closed per GATE-PCLK-01: do not configure HW with invalid clock */
+        /* GATE-PCLK-01に基づくフェイルクローズ: 無効なクロックでHWを構成しないでください */
         return;
     }
 

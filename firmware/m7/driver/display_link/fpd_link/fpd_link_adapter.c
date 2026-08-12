@@ -1,19 +1,18 @@
 /*
  * fpd_link_adapter.c
  *
- * GCU3 M7 — DS90UB941AS-Q1 (serializer, DSI-to-SerDes bridge, "SDSB")
- * initialization over I2C, per baseline v1.1 §16 Production Path and
- * the earlier fast-boot review's REQ-M7-03/REQ-M7-05.
+ * GCU3 M7 — DS90UB941AS-Q1 (シリアライザ、DSI-to-SerDesブリッジ、"SDSB")
+ * の I2C 経由の初期化。ベースライン v1.1 §16 運用パスと、以前の
+ * 高速起動レビューの REQ-M7-03/REQ-M7-05 に従います。
  *
- * IMPORTANT — register map disclaimer:
- *   The register addresses/values below follow the DS90UB941/948
- *   family's publicly documented register layout (general
- *   configuration, DSI port config, PLL/clock, link-lock status), but
- *   exact bit-field values MUST be re-verified against the specific
- *   DS90UB941AS-Q1 datasheet revision and the actual board's strap/
- *   GPIO wiring before production use. Do not flash to a vehicle ECU
- *   without that verification — this is a bring-up skeleton, not a
- *   certified register sequence.
+ * 重要 — レジスタマップの免責事項:
+ *   以下のレジスタアドレス/値は、一般に公開されている DS90UB941/948
+ *   ファミリのレジスタレイアウト（一般設定、DSIポート設定、PLL/クロック、
+ *   リンクロック状態）に従っていますが、正確なビットフィールドの値は、
+ *   運用開始前に特定の DS90UB941AS-Q1 データシートリビジョンと
+ *   実際のボードのストラップ/GPIO 配線に対して再確認しなければなりません。
+ *   その確認なしに車両ECUにフラッシュしないでください。これはBring-up用の
+ *   スケルトンであり、認定されたレジスタシーケンスではありません。
  */
 
 #include "fpd_link_adapter.h"
@@ -22,20 +21,20 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/* 7-bit I2C address as seen by M7; DS90UB941 default I2C address,
- * confirm against board address-select strap (ADDR_ID pin). */
+/* M7 から見た 7 ビット I2C アドレス。DS90UB941 のデフォルト I2C アドレス。
+ * ボードのアドレス選択ストラップ (ADDR_ID ピン) と照らし合わせて確認してください。 */
 #define DS90UB941_I2C_ADDR   0x0CU
 
-/* Register offsets — TBD: verify against DS90UB941AS-Q1 datasheet. */
+/* レジスタオフセット — TBD: DS90UB941AS-Q1 データシートと照らし合わせて確認すること。 */
 #define REG_GENERAL_CFG      0x03U
 #define REG_DSI_LANE_CFG     0x1CU
 #define REG_PLL_CTRL         0x0DU
 #define REG_LINK_STATUS      0x0AU
 #define BIT_LINK_LOCKED      (1U << 0)
 
-#define FPD_LINK_I2C_INSTANCE   2U       /* TBD: confirm LPI2C instance vs. schematic */
-#define FPD_LINK_I2C_BAUD_HZ    400000U  /* Fast-mode, REQ-M7-03 latency optimization */
-#define FPD_LINK_LOCK_TIMEOUT_POLLS  50U /* REQ-M7-05: bounded retry, not infinite poll */
+#define FPD_LINK_I2C_INSTANCE   2U       /* TBD: 回路図と照らし合わせて LPI2C インスタンスを確認すること */
+#define FPD_LINK_I2C_BAUD_HZ    400000U  /* ファストモード、REQ-M7-03 レイテンシ最適化 */
+#define FPD_LINK_LOCK_TIMEOUT_POLLS  50U /* REQ-M7-05: 無限ポーリングではなく、制限付きリトライ */
 
 static bool s_initialized = false;
 
@@ -46,13 +45,13 @@ int fpd_link_adapter_init(void)
         return -1;
     }
 
-    /* Batch init sequence (REQ-M7-03): single transaction burst rather
-     * than per-register round trips, to minimize link bring-up latency
-     * within the 1.0s logo budget (baseline v1.1 §7). */
+    /* バッチ初期化シーケンス (REQ-M7-03): 1.0秒のロゴ表示バジェット
+     * (ベースライン v1.1 §7) 内でリンク Bring-up のレイテンシを最小化するために、
+     * レジスタごとのラウンドトリップではなく、単一トランザクションのバーストを行います。 */
     static const i2c_hal_reg_write_t init_seq[] = {
-        {REG_GENERAL_CFG,  0x9CU}, /* TBD: enable DSI input, i2c pass-through off */
-        {REG_DSI_LANE_CFG, 0x04U}, /* TBD: 4-lane DSI, matches GCU3_DSI_LANE_COUNT */
-        {REG_PLL_CTRL,     0x01U}, /* TBD: enable PLL, select ref clock source */
+        {REG_GENERAL_CFG,  0x9CU}, /* TBD: DSI 入力を有効化、I2C パススルーをオフにする */
+        {REG_DSI_LANE_CFG, 0x04U}, /* TBD: 4 レーン DSI、GCU3_DSI_LANE_COUNT と一致させる */
+        {REG_PLL_CTRL,     0x01U}, /* TBD: PLL を有効化、基準クロックソースを選択する */
     };
 
     i2c_hal_status_t st = i2c_hal_write_sequence(DS90UB941_I2C_ADDR, init_seq,
@@ -73,27 +72,27 @@ int fpd_link_adapter_start(void)
         return -1;
     }
 
-    /* REQ-M7-05 fail-safe: bounded poll for link lock, not indefinite
-     * blocking. On timeout, return failure so display_link.c can decide
-     * whether to retry once (per REQ-M7-05) or escalate to fault_manager. */
+    /* REQ-M7-05 フェールセーフ: リンクロックの制限付きポーリングであり、
+     * 無期限ブロックではありません。タイムアウト時には失敗を返し、display_link.c が
+     * (REQ-M7-05 に従い) 1回リトライするか、fault_manager にエスカレーションするかを決定できるようにします。 */
     for (uint32_t i = 0; i < FPD_LINK_LOCK_TIMEOUT_POLLS; i++)
     {
         if (fpd_link_adapter_health_check() == 0)
         {
             return 0;
         }
-        /* Deliberately no blocking delay call here — caller (boot_manager
-         * state machine) owns timing/scheduling; this driver stays
-         * non-blocking to avoid stalling other boot-critical-path work. */
+        /* 意図的にここでのブロッキング遅延呼び出しを行いません — 呼び出し元 (boot_manager 
+         * ステートマシン) がタイミング/スケジューリングを所有しています。他の起動クリティカルパスの
+         * 作業を停止させないために、このドライバーはノンブロッキングのままとします。 */
     }
 
-    return -1; /* link not locked within budget */
+    return -1; /* バジェット内でリンクがロックされませんでした */
 }
 
 int fpd_link_adapter_stop(void)
 {
     static const i2c_hal_reg_write_t stop_seq[] = {
-        {REG_PLL_CTRL, 0x00U}, /* TBD: disable PLL */
+        {REG_PLL_CTRL, 0x00U}, /* TBD: PLL を無効化 */
     };
     i2c_hal_status_t st = i2c_hal_write_sequence(DS90UB941_I2C_ADDR, stop_seq, 1U);
     s_initialized = false;
