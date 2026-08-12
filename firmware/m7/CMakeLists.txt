@@ -28,6 +28,7 @@ add_executable(gcu3_m7_display
     driver/display_link/fpd_link/fpd_link_adapter.c
     driver/display_link/gmsl/gmsl_adapter.c
     bsp/imx95/imx95_bsp.c
+    display_engine/framebuffer/framebuffer_assets.c
 )
 
 target_include_directories(gcu3_m7_display PRIVATE
@@ -52,6 +53,9 @@ target_include_directories(gcu3_m7_display PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/display_link/hdmi
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/display_link/fpd_link
     ${CMAKE_CURRENT_SOURCE_DIR}/driver/display_link/gmsl
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal/power
+    ${CMAKE_CURRENT_SOURCE_DIR}/hal/backlight
+    ${CMAKE_CURRENT_SOURCE_DIR}/bsp/imx95
 )
 
 # NOTE: MCUXpresso SDK include paths (fsl_lpi2c.h, fsl_mipi_dsi.h,

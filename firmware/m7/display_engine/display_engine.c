@@ -9,7 +9,6 @@
  * DS90UB941AS-Q1 supports up to 4 DSI lanes / 1.5Gbps per lane; 4-lane
  * config chosen to leave headroom for the 1280x480 target in
  * display_config.h without needing compression. */
-#define GCU3_DSI_LANE_COUNT      4U
 #define GCU3_DSI_HS_BITRATE_BPS  1500000000U
 #define GCU3_DPU_PIXEL_FORMAT_RGB565 0U /* placeholder value; map to real
                                             fsl_dpu.h enum at integration time */
@@ -18,6 +17,11 @@ extern const uint8_t g_gcu3_logo_framebuffer[];
 
 void display_engine_init(void)
 {
+    if (GCU3_DISPLAY_PIXEL_CLOCK_HZ == 0U) {
+        /* Fail-closed per GATE-PCLK-01: do not configure HW with invalid clock */
+        return;
+    }
+
     dpu_driver_config_t dpu_cfg = {
         .width_px         = GCU3_DISPLAY_WIDTH,
         .height_px        = GCU3_DISPLAY_HEIGHT,
