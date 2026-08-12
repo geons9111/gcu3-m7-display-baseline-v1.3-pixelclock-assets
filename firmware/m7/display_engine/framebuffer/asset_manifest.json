@@ -1,0 +1,11 @@
+{
+  "resolution": "1280x480",
+  "format": "RGB565",
+  "stride_bytes": 2560,
+  "frame_bytes": 1228800,
+  "assets": [
+    "gcu3_logo_1280x480_rgb565.bin",
+    "gcu3_safe_1280x480_rgb565.bin"
+  ],
+  "status": "verification_asset_until_panel_timing_is_fixed"
+}

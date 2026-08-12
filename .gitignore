@@ -1,0 +1,24 @@
+# Build artifacts
+build/
+out/
+dist/
+*.elf
+*.map
+*.bin
+*.hex
+*.uf2
+*.wic
+*.wic.zst
+*.img
+
+# IDE
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
