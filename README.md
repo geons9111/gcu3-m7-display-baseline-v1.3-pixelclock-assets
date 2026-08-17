@@ -33,6 +33,10 @@ The repository now contains the first compilable architectural skeleton under `f
 - `ai/architecture/baseline/GCU3-M7-Display-Software-Baseline-v1.2.md`
 - `ai/architecture/baseline/IMPLEMENTATION-BLUEPRINT-v1.2.md`
 
+### Documentation & Reports
+- [**ドキュメント目次 (Docs Index)**](docs/README.md)
+- [**アーキテクチャ・MVCパターン & HAL設計戦略 報告書**](docs/architecture/ARCHITECTURE_AND_HAL_REPORT.md)
+
 ## Important implementation status
 
 Hardware-specific implementation remains gated:
