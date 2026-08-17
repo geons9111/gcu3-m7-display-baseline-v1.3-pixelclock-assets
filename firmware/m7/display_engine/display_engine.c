@@ -2,6 +2,7 @@
 #include "dpu_driver.h"
 #include "mipi_dsi_hal.h"
 #include "display_config.h"
+#include <stdbool.h>
 
 /* HSビットレート/ピクセルフォーマットは、実際のDSIからSerDesへのブリッジデータシート(fpd_link_adapter)に対する§21/GATE-07スタイルの確認が保留中のため、
  * ここでは明示的な名前付き定数として残されています(display_config.hにはまだありません)。
@@ -11,7 +12,11 @@
 #define GCU3_DPU_PIXEL_FORMAT_RGB565 0U /* プレースホルダー値。統合時に実際の
                                             fsl_dpu.hの列挙型にマッピングします */
 
+/* TODO: g_gcu3_logo_framebuffer (gcu3_logo_1280x480_rgb565.bin) は現在単色のプレースホルダーです。
+ * 今後、実際のロゴ画像に置き換える必要があります。 */
 extern const uint8_t g_gcu3_logo_framebuffer[];
+
+static bool s_is_initialized = false;
 
 void display_engine_init(void)
 {
@@ -26,7 +31,9 @@ void display_engine_init(void)
         .pixel_format     = GCU3_DPU_PIXEL_FORMAT_RGB565,
         .framebuffer_addr = (uint32_t)(uintptr_t)g_gcu3_logo_framebuffer
     };
-    (void)dpu_driver_init(&dpu_cfg);
+    if (dpu_driver_init(&dpu_cfg) != 0) {
+        return;
+    }
 
     mipi_dsi_hal_config_t dsi_cfg = {
         .width_px       = GCU3_DISPLAY_WIDTH,
@@ -36,10 +43,15 @@ void display_engine_init(void)
         .pixel_clock_hz  = GCU3_DISPLAY_PIXEL_CLOCK_HZ
     };
     (void)mipi_dsi_hal_init(&dsi_cfg);
+    
+    s_is_initialized = true;
 }
 
 void display_engine_start(void)
 {
+    if (!s_is_initialized) {
+        return;
+    }
     (void)dpu_driver_start();
     mipi_dsi_hal_start();
 }

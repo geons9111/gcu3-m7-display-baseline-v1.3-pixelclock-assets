@@ -44,6 +44,9 @@ int dpu_driver_init(const dpu_driver_config_t *config)
     DPU_Init(s_dpu_base, &dpu_init_config);
 
     DPU_GetDefaultDisplayTimingConfig(&s_timing);
+    if (s_cfg.pixel_clock_hz == 0U) {
+        return -1; /* GATE-PCLK-01 OPEN: 실제 패널 타이밍 미확정 상태에서 DPU 활성화 금지 */
+    }
     s_timing.width  = s_cfg.width_px;
     s_timing.height = s_cfg.height_px;
     /* GCU3_DISPLAY_PIXEL_CLOCK_HZは現在0です（車両モニターのデータシート待ちのため、config/display_config.hで未定）。
