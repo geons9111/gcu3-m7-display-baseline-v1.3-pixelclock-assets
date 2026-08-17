@@ -28,6 +28,11 @@ The `firmware/m7` source tree is an architectural skeleton. Hardware-specific re
   - 動作確認済みのドライバーコードをベースに、`Std_Types.h` および `CDD` (Complex Device Driver) ラッパーを実装する。
   - Service層モジュールを `Runnable` 構造に再構築し、AUTOSAR-Ready構造へ移行する。
 
+## MVC (Model-View-Controller) アーキテクチャ構成
+- **Model**: 車両データ / 診断状態 (`diagnostic_manager`, `fault_manager`, `health_manager`, `ownership_manager`)
+- **View**: 表示パイプライン / フレームバッファ出力 (`display_engine`, `dpu_driver`, `mipi_dsi_hal`, `framebuffer_assets`)
+- **Controller**: 起動・遷移オーケストレーション (`m7_application`, `boot_manager`, `display_manager`)
+
 ## Important
 
 The current values in `display_config.h` marked `provisional` are placeholders and are not production calibration values.

@@ -4,6 +4,12 @@
 
 `Application → Service → HAL / Display Engine → Driver → BSP / Platform`
 
+### MVC (Model-View-Controller) 設計パターン
+本ファームウェアは、高速起動と表示制御の安全性を担保するため **MVCパターン** に基づいてモジュールが明確に分離されています。
+- **Model (データ・状態管理)**: `health_manager`, `fault_manager`, `ownership_manager`, CANテレメトリデータ
+- **View (表示・スキャンアウト)**: `framebuffer_assets`, `display_engine`, `dpu_driver`, `mipi_dsi_hal`
+- **Controller (シーケンス制御・調停)**: `m7_application`, `boot_manager`, `display_manager`
+
 ## Implementation
 
 The repository now contains the first compilable architectural skeleton under `firmware/m7`.
